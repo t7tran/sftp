@@ -10,7 +10,7 @@ RUN echo "@community http://dl-cdn.alpinelinux.org/alpine/v3.15/community" >> /e
     mkdir -p /var/run/sshd && \
     rm -f /etc/ssh/ssh_host_*key*
 
-COPY rootfs /
+COPY ./rootfs /
 
 EXPOSE 22
 
