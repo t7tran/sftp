@@ -1,6 +1,6 @@
 # SFTP
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/t7tran/sftp/build?logo=github) ![GitHub stars](https://img.shields.io/github/stars/t7tran/sftp?logo=github) ![Docker Stars](https://img.shields.io/docker/stars/t7tran/sftp?label=stars&logo=docker) ![Docker Pulls](https://img.shields.io/docker/pulls/t7tran/sftp?label=pulls&logo=docker)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/t7tran/sftp/Build%20on%20every%20push?logo=github) ![GitHub stars](https://img.shields.io/github/stars/t7tran/sftp?logo=github) ![Docker Stars](https://img.shields.io/docker/stars/t7tran/sftp?label=stars&logo=docker) ![Docker Pulls](https://img.shields.io/docker/pulls/t7tran/sftp?label=pulls&logo=docker)
 
 ![OpenSSH logo](https://raw.githubusercontent.com/t7tran/sftp/master/openssh.png "Powered by OpenSSH")
 
