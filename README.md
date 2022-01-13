@@ -31,7 +31,7 @@ Easy to use SFTP ([SSH File Transfer Protocol](https://en.wikipedia.org/wiki/SSH
 ## Simplest docker run example
 
 ```
-docker run -p 22:22 -d t7tran/sftp:0.1 foo:pass:::upload
+docker run -p 22:22 -d t7tran/sftp:0.1.0 foo:pass:::upload
 ```
 
 User "foo" with password "pass" can login with sftp and upload files to a folder called "upload". No mounted directories or custom UID/GID. Later you can inspect the files and use `--volumes-from` to mount them somewhere else (or see next example).
@@ -43,7 +43,7 @@ Let's mount a directory and set UID:
 ```
 docker run \
     -v <host-dir>/upload:/home/foo/upload \
-    -p 2222:22 -d t7tran/sftp:0.1 \
+    -p 2222:22 -d t7tran/sftp:0.1.0 \
     foo:pass:1001
 ```
 
@@ -51,7 +51,7 @@ docker run \
 
 ```
 sftp:
-    image: t7tran/sftp:0.1
+    image: t7tran/sftp:0.1.0
     volumes:
         - <host-dir>/upload:/home/foo/upload
     ports:
@@ -69,7 +69,7 @@ The OpenSSH server runs by default on port 22, and in this example, we are forwa
 docker run \
     -v <host-dir>/users.conf:/etc/sftp/users.conf:ro \
     -v mySftpVolume:/home \
-    -p 2222:22 -d t7tran/sftp:0.1
+    -p 2222:22 -d t7tran/sftp:0.1.0
 ```
 
 <host-dir>/users.conf:
@@ -87,7 +87,7 @@ Add `:e` behind password to mark it as encrypted. Use single quotes if using ter
 ```
 docker run \
     -v <host-dir>/share:/home/foo/share \
-    -p 2222:22 -d t7tran/sftp:0.1 \
+    -p 2222:22 -d t7tran/sftp:0.1.0 \
     'foo:$1$0G2g0GSt$ewU0t6GXG15.0hWoOX8X9.:e:1001'
 ```
 
@@ -103,7 +103,7 @@ docker run \
     -v <host-dir>/id_rsa.pub:/home/foo/.ssh/keys/id_rsa.pub:ro \
     -v <host-dir>/id_other.pub:/home/foo/.ssh/keys/id_other.pub:ro \
     -v <host-dir>/share:/home/foo/share \
-    -p 2222:22 -d t7tran/sftp:0.1 \
+    -p 2222:22 -d t7tran/sftp:0.1.0 \
     foo::1001
 ```
 
@@ -116,7 +116,7 @@ docker run \
     -v <host-dir>/ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key \
     -v <host-dir>/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key \
     -v <host-dir>/share:/home/foo/share \
-    -p 2222:22 -d t7tran/sftp:0.1 \
+    -p 2222:22 -d t7tran/sftp:0.1.0 \
     foo::1001
 ```
 
