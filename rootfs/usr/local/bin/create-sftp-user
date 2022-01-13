@@ -13,7 +13,9 @@ reDir='[^:]*'
 #reArgs="^($reUser)(:$rePass)(:e)?(:$reUid)?(:$reGid)?(:$reDir)?$"
 
 function log() {
-    echo "[$0] $*"
+    if [[ "$DEBUG" == "true" ]]; then
+    	echo "[$0] $*"
+    fi
 }
 
 function validateArg() {

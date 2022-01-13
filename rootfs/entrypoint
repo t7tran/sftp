@@ -13,7 +13,9 @@ userConfPathLegacy="/etc/sftp-users.conf"
 userConfFinalPath="/var/run/sftp/users.conf"
 
 function log() {
-    echo "[$0] $*" >&2
+    if [[ "$DEBUG" == "true" ]]; then
+    	echo "[$0] $*" >&2
+    fi
 }
 
 # Allow running other programs, e.g. bash
