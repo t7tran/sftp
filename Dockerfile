@@ -12,6 +12,6 @@ RUN echo "@community http://dl-cdn.alpinelinux.org/alpine/v3.15/community" >> /e
 
 COPY ./rootfs /
 
-EXPOSE 22
+EXPOSE 2222
 
 ENTRYPOINT ["/entrypoint"]
