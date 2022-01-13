@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   sftp:
-    image: t7tran/sftp:0.1.0
+    image: t7tran/sftp:0.2.0
     ports:
     - "2222:22"
     command:
