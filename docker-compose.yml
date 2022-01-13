@@ -3,7 +3,7 @@ services:
   sftp:
     image: t7tran/sftp:0.2.0
     ports:
-    - "2222:22"
+    - "2222:2222"
     command:
     - foo:pass:1001
     environment:
