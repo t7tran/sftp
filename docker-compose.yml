@@ -6,6 +6,8 @@ services:
     - "2222:22"
     command:
     - foo:pass:1001
+    environment:
+      CHOWN_RECURSIVE: 'true'
     volumes:
     - upload:/home/foo/upload
 volumes:

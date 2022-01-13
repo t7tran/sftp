@@ -31,6 +31,15 @@ function validateArg() {
     fi
 }
 
+function chownHomeData() {
+	local flag=-f
+	if [[ "$CHOWN_RECURSIVE" == "true" ]]; then flag=-Rf; fi
+	# error will be ignore, e.g. readonly mount point
+	for f in `find "/home/$user" -maxdepth 1 -mindepth 1`; do
+		chown $flag $uid:$gid $f 2>&1 || true
+	done
+}
+
 log "Parsing user data: \"$1\""
 IFS=':' read -ra args <<< "$1"
 
@@ -52,6 +61,7 @@ dir="${args[$((skipIndex+4))]}"; validateArg "dirs" "$dir" "$reDir" || exit 1
 
 if getent passwd "$user" > /dev/null; then
     log "WARNING: User \"$user\" already exists. Skipping."
+    chownHomeData
     exit 0
 fi
 
@@ -75,6 +85,8 @@ chmod 755 "/home/$user"
 # Retrieving user id to use it in chown commands instead of the user name
 # to avoid problems on alpine when the user name contains a '.'
 uid="$(id -u "$user")"
+
+chownHomeData
 
 if [ -n "$pass" ]; then
     echo "$user:$pass" | chpasswd $chpasswdOptions
