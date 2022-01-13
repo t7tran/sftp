@@ -1,86 +1,65 @@
-name: build
+name: Build on every push
 
 on:
-  schedule:
-    - cron: "0 12 * * *"
   push:
-    paths-ignore:
-      - "*.md"
-      - "*.txt"
-      - "*.png"
+    branches:
+      - master
   pull_request:
-
-env:
-  IMAGE_NAME: atmoz/sftp
+    # The branches below must be a subset of the branches above
+    branches:
+      - master
+  schedule:
+    - cron: '15 11 * * 3'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
         with:
-          fetch-depth: 0 # for proper signature verification
-          submodules: true # for shunit2
+          driver-opts: network=host
 
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+      - name: Cache Docker layers
+        uses: actions/cache@v2
         with:
-          ignore_paths: tests/shunit2
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-      - name: Build debian image
-        run: |
-          docker build . \
-            --pull=true \
-            --file=Dockerfile \
-            --tag="$IMAGE_NAME:latest" \
-            --tag="$IMAGE_NAME:debian" \
-            --label="org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-            --label="org.opencontainers.image.revision=$GITHUB_SHA" \
-            --label="org.opencontainers.image.created=$(date --rfc-3339=seconds)"
-
-      - name: Test debian image
-        run: tests/run $IMAGE_NAME:debian
-
-      - name: Build alpine image
-        run: |
-          docker build . \
-            --pull=true \
-            --file=Dockerfile-alpine \
-            --tag="$IMAGE_NAME:alpine" \
-            --label="org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-            --label="org.opencontainers.image.revision=$GITHUB_SHA" \
-            --label="org.opencontainers.image.created=$(date --rfc-3339=seconds)"
-
-      - name: Test alpine image
-        run: tests/run $IMAGE_NAME:alpine
-
-      - name: Verify signature
-        if: github.ref == 'refs/heads/master'
-        uses: atmoz/git-verify-ref@master
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v2
         with:
-          import-github-users: atmoz
+          context: .
+          file: "./Dockerfile"
+          tags: ${{ github.repository }}:${{ github.sha }}
+          load: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-      - name: Push images to Docker Hub registry
-        if: github.ref == 'refs/heads/master'
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ github.repository }}:${{ github.sha }}
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
         run: |
-          echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login \
-            -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-          docker push --all-tags $IMAGE_NAME
-          docker logout
-
-      - name: Push images to GitHub registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com \
-            -u ${{ github.actor }} --password-stdin
-
-          TAG_DEBIAN=docker.pkg.github.com/$GITHUB_REPOSITORY/debian
-          TAG_ALPINE=docker.pkg.github.com/$GITHUB_REPOSITORY/alpine
-          docker tag $IMAGE_NAME:debian $TAG_DEBIAN
-          docker tag $IMAGE_NAME:alpine $TAG_ALPINE
-          docker push $TAG_DEBIAN
-          docker push $TAG_ALPINE
-          docker logout docker.pkg.github.com
-
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
