@@ -17,8 +17,13 @@ function bindmount() {
 # Remember permissions, you may have to fix them:
 # chown -R :users /data/common
 
-for home in `find "/home" -maxdepth 1 -mindepth 1 -type d`; do
-	for f in `find "/opt/shared" -maxdepth 1 -mindepth 1`; do
+for f in `find "/opt/shared" -maxdepth 1 -mindepth 1`; do
+	if [[ -d "$f" ]]; then
+		chmod 777 "$f" &>/dev/null
+	elif [[ -f "$f" ]]; then
+		chmod 666 "$f" &>/dev/null
+	fi
+	for home in `find "/home" -maxdepth 1 -mindepth 1 -type d`; do
 		bindmount $f $home/`basename $f`
 	done
 done
