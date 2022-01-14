@@ -1,15 +1,35 @@
 version: '3.7'
+
+x-base: &base
+  image: t7tran/sftp:0.4.0
+
 services:
   sftp:
-    image: t7tran/sftp:0.4.0
+    <<: *base
     ports:
-    - "2222:2222"
+    - "2201:2222"
     command:
-    - foo:pass:1001
+    - user1:pass:1001
+    - user2:pass:1002
     environment:
       CHOWN_RECURSIVE: 'true'
     volumes:
     - upload:/home/foo/upload
+  sftp2:
+    <<: *base
+    ports:
+    - "2202:2222"
+    command:
+    - user1:pass:1001
+    - user2:pass:1002
+    environment:
+      CHOWN_RECURSIVE: 'true'
+    privileged: true
+    cap_add:
+    - CAP_SYS_ADMIN
+    volumes:
+    - upload:/home/foo/upload
+    - ./shared:/opt/shared
 volumes:
   upload:
     labels:
