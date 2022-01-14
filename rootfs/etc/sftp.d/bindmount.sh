@@ -5,11 +5,12 @@
 [[ -d /opt/shared ]] || exit 0
 
 function bindmount() {
-	[[ -e "$2" ]] && echo Target mount "$2" exists. Ignored. && return
-	if [ -d "$1" ]; then
-		mkdir -p "$2"
-	else
-		touch "$2"
+	if [[ ! -e "$2" ]]; then
+		if [ -d "$1" ]; then
+			mkdir -p "$2"
+		else
+			touch "$2"
+		fi
 	fi
     mount --bind $3 "$1" "$2"
 }
