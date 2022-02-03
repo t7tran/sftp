@@ -21,9 +21,11 @@ function bindmount() {
 for f in `find "/opt/shared" -maxdepth 1 -mindepth 1`; do
 	if [[ -d "$f" ]]; then
 		chmod 777 "$f" &>/dev/null
+		chmod g+swrx "$f" &>/dev/null
 	elif [[ -f "$f" ]]; then
 		chmod 666 "$f" &>/dev/null
 	fi
+	chown :users $f &>/dev/null
 	for home in `find "/home" -maxdepth 1 -mindepth 1 -type d`; do
 		bindmount $f $home/`basename $f`
 	done
