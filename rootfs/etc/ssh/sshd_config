@@ -18,8 +18,8 @@ AllowTcpForwarding no
 UsePrivilegeSeparation no
 
 # Force sftp and chroot jail
-Subsystem sftp internal-sftp
-ForceCommand internal-sftp
+Subsystem sftp internal-sftp -u UMASK
+ForceCommand internal-sftp -u UMASK
 ChrootDirectory %h
 
 # Enable this for more logs

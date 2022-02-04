@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-base: &base
-  image: t7tran/sftp:0.7.0
+  image: t7tran/sftp:0.10.0
 
 services:
   sftp:
@@ -24,6 +24,7 @@ services:
     - user2:pass:1002
     environment:
       CHOWN_RECURSIVE: 'true'
+      UMASK: '0002'
     privileged: true
     cap_add:
     - CAP_SYS_ADMIN

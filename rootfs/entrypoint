@@ -102,6 +102,10 @@ fi
 
 if [[ "$UMASK" =~ ^[0-9]+$ ]]; then
 	echo "umask $UMASK" > /etc/profile.d/umask.sh
+	echo "umask $UMASK" > /etc/init.d/ssh
+	sed -i "s/UMASK/${UMASK}/g" /etc/ssh/sshd_config
+elif [[ -w /etc/ssh/sshd_config ]]; then
+	sed -i 's/UMASK/0022/g' /etc/ssh/sshd_config
 fi
 
 if $startSshd; then
