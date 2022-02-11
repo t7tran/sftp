@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-base: &base
-  image: t7tran/sftp:0.10.0
+  image: t7tran/sftp:0.11.0
 
 services:
   sftp:
@@ -9,8 +9,8 @@ services:
     ports:
     - "2201:2222"
     command:
-    - user1:pass:1001
-    - user2:pass:1002
+    - user1:pass:1001 # sftp -P 2201 user1@localhost
+    - user2:pass:1002 # sftp -P 2201 user2@localhost
     environment:
       CHOWN_RECURSIVE: 'true'
     volumes:
@@ -20,8 +20,8 @@ services:
     ports:
     - "2202:2222"
     command:
-    - user1:pass:1001
-    - user2:pass:1002
+    - user1:pass:1001 # sftp -P 2202 user1@localhost
+    - user2:pass:1002 # sftp -P 2202 user2@localhost
     environment:
       CHOWN_RECURSIVE: 'true'
       UMASK: '0002'

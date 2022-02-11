@@ -36,6 +36,7 @@ function chownHomeData() {
 	if [[ "$CHOWN_RECURSIVE" == "true" ]]; then flag=-Rf; fi
 	# error will be ignore, e.g. readonly mount point
 	for f in `find "/home/$user" -maxdepth 1 -mindepth 1`; do
+        log chowning $flag $uid:$gid $f
 		chown $flag $uid:$gid $f 2>&1 || true
 	done
 }
@@ -85,6 +86,7 @@ chmod 755 "/home/$user"
 # Retrieving user id to use it in chown commands instead of the user name
 # to avoid problems on alpine when the user name contains a '.'
 uid="$(id -u "$user")"
+gid="$(id -g "$user")"
 
 chownHomeData
 
