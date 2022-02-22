@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-base: &base
-  image: ghcr.io/t7tran/sftp:0.13.0
+  image: ghcr.io/t7tran/sftp:0.14.0
 
 services:
   sftp:
