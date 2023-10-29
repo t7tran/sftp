@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -Eeo pipefail
 
 # shellcheck disable=2154
@@ -13,7 +13,9 @@ reDir='[^:]*'
 #reArgs="^($reUser)(:$rePass)(:e)?(:$reUid)?(:$reGid)?(:$reDir)?$"
 
 function log() {
-    echo "[$0] $*"
+    if [[ "$DEBUG" == "true" ]]; then
+    	echo "[$0] $*"
+    fi
 }
 
 function validateArg() {
@@ -27,6 +29,16 @@ function validateArg() {
         log "ERROR: Invalid $name \"$val\", do not match required regex pattern: $re"
         return 1
     fi
+}
+
+function chownHomeData() {
+	local flag=-f
+	if [[ "$CHOWN_RECURSIVE" == "true" ]]; then flag=-Rf; fi
+	# error will be ignore, e.g. readonly mount point
+	for f in `find "/home/$user" -maxdepth 1 -mindepth 1`; do
+        log chowning $flag $uid:$gid $f
+		chown $flag $uid:$gid $f 2>&1 || true
+	done
 }
 
 log "Parsing user data: \"$1\""
@@ -50,6 +62,7 @@ dir="${args[$((skipIndex+4))]}"; validateArg "dirs" "$dir" "$reDir" || exit 1
 
 if getent passwd "$user" > /dev/null; then
     log "WARNING: User \"$user\" already exists. Skipping."
+    chownHomeData
     exit 0
 fi
 
@@ -73,6 +86,9 @@ chmod 755 "/home/$user"
 # Retrieving user id to use it in chown commands instead of the user name
 # to avoid problems on alpine when the user name contains a '.'
 uid="$(id -u "$user")"
+gid="$(id -g "$user")"
+
+chownHomeData
 
 if [ -n "$pass" ]; then
     echo "$user:$pass" | chpasswd $chpasswdOptions

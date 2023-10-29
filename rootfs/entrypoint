@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -Eeo pipefail
 
 # shellcheck disable=2154
@@ -13,7 +13,9 @@ userConfPathLegacy="/etc/sftp-users.conf"
 userConfFinalPath="/var/run/sftp/users.conf"
 
 function log() {
-    echo "[$0] $*" >&2
+    if [[ "$DEBUG" == "true" ]]; then
+    	echo "[$0] $*" >&2
+    fi
 }
 
 # Allow running other programs, e.g. bash
@@ -64,12 +66,20 @@ if [ ! -f "$userConfFinalPath" ]; then
         exit 3
     fi
 
-    # Generate unique ssh keys for this container, if needed
+    # Generate or copy unique ssh keys for this container, if needed
     if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
-        ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+	    if [ -f /etc/keys/ssh_host_ed25519_key ]; then
+    		cp /etc/keys/ssh_host_ed25519_key /etc/ssh
+    	else
+	        ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+	    fi
     fi
     if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
-        ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key -N ''
+	    if [ -f /etc/keys/ssh_host_rsa_key ]; then
+    		cp /etc/keys/ssh_host_rsa_key /etc/ssh
+    	else
+        	ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key -N ''
+        fi
     fi
 
     # Restrict access from other users
@@ -88,6 +98,16 @@ if [ -d /etc/sftp.d ]; then
         fi
     done
     unset f
+fi
+
+CUSTOM_UMASK=0022
+if [[ "$UMASK" =~ ^[0-9]+$ ]]; then
+	CUSTOM_UMASK=$UMASK
+fi
+echo "umask $CUSTOM_UMASK" > /etc/profile.d/umask.sh
+echo "umask $CUSTOM_UMASK" > /etc/init.d/ssh
+if [[ -w /etc/ssh/sshd_config ]]; then
+	sed -i "s/UMASK/${CUSTOM_UMASK}/g" /etc/ssh/sshd_config
 fi
 
 if $startSshd; then

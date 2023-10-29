@@ -1,0 +1,37 @@
+version: '3.7'
+
+x-base: &base
+  image: ghcr.io/t7tran/sftp:1.0.0
+
+services:
+  sftp:
+    <<: *base
+    ports:
+    - "2201:2222"
+    command:
+    - user1:pass:1001 # sftp -P 2201 user1@localhost
+    - user2:pass:1002 # sftp -P 2201 user2@localhost
+    environment:
+      CHOWN_RECURSIVE: 'true'
+    volumes:
+    - upload:/home/foo/upload
+  sftp2:
+    <<: *base
+    ports:
+    - "2202:2222"
+    command:
+    - user1:pass:1001 # sftp -P 2202 user1@localhost
+    - user2:pass:1002 # sftp -P 2202 user2@localhost
+    environment:
+      CHOWN_RECURSIVE: 'true'
+      UMASK: '0002'
+    privileged: true
+    cap_add:
+    - CAP_SYS_ADMIN
+    volumes:
+    - upload:/home/foo/upload
+    - ./shared:/opt/shared
+volumes:
+  upload:
+    labels:
+    - "app=sftp"
